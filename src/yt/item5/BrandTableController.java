@@ -19,4 +19,9 @@ public class BrandTableController extends AbstractTableController<Brand, Integer
 		return checkString2Int(request.getParameter("brandId"));
 	}
 
+	@Override
+	public Integer parsePkFromInt(int k) {
+		return Integer.valueOf(k);
+	}
+
 }

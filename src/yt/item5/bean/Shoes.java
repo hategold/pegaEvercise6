@@ -17,6 +17,8 @@ public class Shoes implements Serializable, EntityInterface {
 	private int price;
 
 	private Brand brand;
+	
+	private int brandId;
 
 	public Shoes() {
 
@@ -100,5 +102,14 @@ public class Shoes implements Serializable, EntityInterface {
 	public void setForeignClassNull() {
 		setBrand(null);
 
+	}
+
+	public int getBrandId() {
+		return brandId;
+	}
+
+	public Shoes setBrandId(int brandId) {
+		this.brandId = brandId;
+		return this;
 	}
 }

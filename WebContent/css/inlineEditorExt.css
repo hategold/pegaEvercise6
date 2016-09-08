@@ -1,0 +1,12 @@
+@CHARSET "Utf-8";
+.icon-refresh {
+    background-image: url(../img/refresh.png) !important;
+}
+
+.icon-add {
+    background-image: url(../img/add.png) !important;
+}
+
+.icon-delete {
+    background-image: url(../img/delete.png) !important;
+}

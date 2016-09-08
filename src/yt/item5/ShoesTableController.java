@@ -27,7 +27,7 @@ public class ShoesTableController extends AbstractTableController<Shoes, Integer
 	@Override
 	public Shoes buildEntityByJson(JsonObject jsonData) {
 		Shoes entity = super.buildEntityByJson(jsonData).setBrand(generalService.buildFkEntity(Integer.valueOf(jsonData.get("brandId").getAsString())));
-		if (entity.getBrand() == null) {
+		if (entity.getBrand() == null && entity.getBrandId() != 0) {
 			return null;
 		}
 		return entity;
@@ -35,14 +35,29 @@ public class ShoesTableController extends AbstractTableController<Shoes, Integer
 
 	@Override
 	public String buildJsonDataList(HttpServletRequest request) {
-		Brand brand = generalService.buildFkEntity(Integer.valueOf(request.getParameter("brandId")));
-		if (brand == null)
-			return null;
-		List<Shoes> ShoesList = generalService.findByCondition("brandId =" + String.valueOf(brand.getBrandId()));
+		List<Shoes> ShoesList = null;
+		if (request.getParameter("brandId") == null) {
+			ShoesList = generalService.findAll();
+		} else {
+			Brand brand = generalService.buildFkEntity(Integer.valueOf(request.getParameter("brandId")));
+			ShoesList = generalService.findByCondition("brandId =" + String.valueOf(brand.getBrandId()));
+		}
+
 		for (Shoes obj : ShoesList) {
+			if (obj.getBrand() != null)
+				obj.setBrandId(obj.getBrand().getBrandId());
 			obj.setForeignClassNull();
 		}
 		return new Gson().toJson(ShoesList);
+	}
+
+	@Override
+	public Integer parsePkFromInt(int k) {
+		try {
+			return Integer.valueOf(k);
+		} catch (NullPointerException e) {
+			return 0;
+		}
 	}
 
 }

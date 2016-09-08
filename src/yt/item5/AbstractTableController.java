@@ -14,6 +14,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import yt.item5.bean.EntityInterface;
@@ -40,6 +42,8 @@ public abstract class AbstractTableController<T extends EntityInterface, PK exte
 
 	public abstract PK parsePkFromReq(HttpServletRequest request);
 
+	public abstract PK parsePkFromInt(int k);
+
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		initGeneralService();
 		String forward = excuteAction(request.getParameter("action"), request);
@@ -55,18 +59,46 @@ public abstract class AbstractTableController<T extends EntityInterface, PK exte
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		initGeneralService();
-		JsonObject jsonData = new Gson().fromJson(request.getReader(), JsonObject.class);
-		System.out.println(jsonData);
+		String action = request.getParameter("action");
+		boolean deleteAction = isDelete(action);
 
-		T entity = buildEntityByJson(jsonData);
-
-		if (isCreate(entity.getId())) {
-			generalService.insert(entity);
+		JsonElement je = new Gson().fromJson(request.getReader(), JsonElement.class);
+		if (je.isJsonArray()) {
+			JsonArray jsonArray = je.getAsJsonArray();
+			JsonObject jsonData = null;
+			for (int i = 0; i < jsonArray.size(); i++) {
+				jsonData = jsonArray.get(i).getAsJsonObject();
+				System.out.println(jsonData);
+				T entity = buildEntityByJson(jsonData);
+				generalService.deleteById(parsePkFromInt(entity.getId()));
+				
+			}
 		} else {
-			generalService.update(entity);
+			JsonObject jsonData = je.getAsJsonObject();
+			System.out.println(jsonData);
+			T entity = buildEntityByJson(jsonData);
+
+			if (isCreate(entity.getId())) {
+				generalService.insert(entity);
+			} else if (deleteAction) {
+				generalService.deleteById(parsePkFromInt(entity.getId()));
+				return;
+			} else {
+				generalService.update(entity);
+			}
+			entity.setForeignClassNull();
+			responseJson(response, new Gson().toJson(entity));
 		}
-		entity.setForeignClassNull();
-		responseJson(response, new Gson().toJson(entity));
+
+	}
+
+	private boolean isDelete(String action) {
+		try {
+			return ActionEnum.valueOf(action.toUpperCase()) == ActionEnum.DELETE;
+
+		} catch (NullPointerException e) {
+			return false;
+		}
 	}
 
 	public T buildEntityByJson(JsonObject jsonData) {
@@ -95,7 +127,6 @@ public abstract class AbstractTableController<T extends EntityInterface, PK exte
 		}
 		return entity;
 	}
-
 
 	public String buildJsonDataList(HttpServletRequest request) {
 		List<T> objList = generalService.findAll();
