@@ -56,7 +56,12 @@ public abstract class GeneralService<T extends EntityInterface, PK extends Seria
 	}
 
 	@Override
-	public abstract T processUpdate(T entity, PK fkId);
+	public List<T> findByFk(String fkFieldName, PK fkId) {
+		return genericDao.findByFk(fkFieldName, fkId);
+	}
+
+	@Override
+	public abstract T associateFkEntity(T entity, PK fkId);
 
 	@Override
 	public abstract <FT extends EntityInterface> FT buildFkEntity(PK fkId);

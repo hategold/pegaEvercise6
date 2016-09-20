@@ -3,6 +3,10 @@ package yt.item5.dao;
 import java.io.Serializable;
 import java.util.List;
 
+import org.hibernate.Criteria;
+import org.hibernate.Session;
+import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.orm.hibernate5.support.HibernateDaoSupport;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -75,6 +79,16 @@ public class HibernateGenericDaoImpl<T, PK extends Serializable> extends Hiberna
 	public List<T> findByCondition(String s) {
 		@SuppressWarnings("unchecked")
 		List<T> entityList = (List<T>) getHibernateTemplate().find("From " + entityType.getName() + " Where " + s);
+		return entityList;
+	}
+	
+	@Override
+	public List<T> findByFk(String fkFieldName, PK fkId) {
+		Session session = getHibernateTemplate().getSessionFactory().getCurrentSession();
+		Criteria criteria = DetachedCriteria.forClass(entityType).getExecutableCriteria(session);
+		@SuppressWarnings("unchecked")
+		List<T> entityList = criteria.createCriteria(fkFieldName).add(Restrictions.idEq(fkId)).list();
+		session.close();
 		return entityList;
 	}
 }

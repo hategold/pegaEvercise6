@@ -28,8 +28,10 @@ public interface CrudServiceInterface<T extends EntityInterface, PK extends Seri
 
 	public List<T> findByCondition(String subHQL);
 
-	public T processUpdate(T entity, PK fkId);
+	public T associateFkEntity(T entity, PK fkId);
 
 	public <FT extends EntityInterface> FT buildFkEntity(PK fkId);
+
+	List<T> findByFk(String fkFieldName, PK fkId);
 
 }

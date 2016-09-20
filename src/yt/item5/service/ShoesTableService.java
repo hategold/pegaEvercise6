@@ -40,17 +40,14 @@ public class ShoesTableService extends GeneralService<Shoes, Integer> implements
 
 	@Transactional
 	@Override
-	public Shoes processUpdate(Shoes shoes, Integer fkId) {
+	public Shoes associateFkEntity(Shoes shoes, Integer fkId) {
 		Brand brand = buildFkEntity(fkId);
 
-		if (brand == null && shoes == null)
+		if (brand == null)
 			return null;
 
 		if (shoes == null)
 			return shoes = new Shoes().setBrand(brand);
-		
-//		if (brand == null)
-//			brand = shoes.getBrand();
 
 		if (!isShoesMapToBrand(shoes, brand))
 			return null;

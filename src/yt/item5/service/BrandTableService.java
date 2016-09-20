@@ -6,7 +6,7 @@ import yt.item5.bean.EntityInterface;
 public class BrandTableService extends GeneralService<Brand, Integer> {
 
 	@Override
-	public Brand processUpdate(Brand entity, Integer fkId) {
+	public Brand associateFkEntity(Brand entity, Integer fkId) {
 		return entity;
 	}
 

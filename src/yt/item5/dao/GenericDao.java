@@ -18,5 +18,7 @@ public interface GenericDao<T, PK extends Serializable> {
 
 	public List<T> findByCondition(String s);
 
+	List<T> findByFk(String fkFieldName, PK fkId);
+
 
 }
