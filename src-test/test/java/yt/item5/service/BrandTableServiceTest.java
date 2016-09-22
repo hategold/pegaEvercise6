@@ -17,13 +17,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class BrandTableServiceTest {
-
 	private CrudServiceInterface<Brand, Integer> testService;
 
 	@Before
 	public void setUp() throws Exception {
 		testService = new BrandTableService();
-
 	}
 
 	@After

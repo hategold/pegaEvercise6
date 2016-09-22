@@ -19,11 +19,13 @@ public class ShoesTableServiceTest {
 
 	private CrudServiceInterface<Shoes, Integer> testService;
 
+	private GenericDao mockDao;
+
 	@Before
 	public void setUp() throws Exception {
 		testService = new ShoesTableService();
-
-		testService.setGenericDao(mock(GenericDao.class));
+		mockDao = mock(GenericDao.class);
+		testService.setGenericDao(mockDao);
 	}
 
 	@After
@@ -33,36 +35,45 @@ public class ShoesTableServiceTest {
 
 	@Test
 	public void testDao() {
-		GenericDao mockDao = mock(GenericDao.class);
 		testService.setGenericDao(mockDao);
 		assertEquals(mockDao, testService.getGenericDao());
 	}
 
 	@Test
 	public void testInsert() {
-		GenericDao mockDao = testService.getGenericDao();
-
 		Shoes shoes = new Shoes();
 		shoes.setShoesId(5);
+
+		insertWithTrue(shoes); //insertCase1
+
+		reset(mockDao);
+
+		insertWithFalse(shoes); //insertCase2
+
+	}
+
+	private void insertWithTrue(Shoes shoes) { //insertCase1 : insert mockDao return true
 		when(mockDao.insert(shoes)).thenReturn(true);
 		testService.insert(shoes);
-
 		verify(mockDao).insert(shoes);
+	};
 
+	private void insertWithFalse(Shoes shoes) { //insertCase2 : insert mockDao return false
 		when(mockDao.insert(shoes)).thenReturn(false);
+		testService.insert(shoes);
 		verify(mockDao).insert(shoes);
-	}
+	};
 
 	@Test
 	public void testUpdate() {
-		GenericDao mockDao = testService.getGenericDao();
+
 		Shoes shoes = new Shoes();
 		shoes.setShoesId(5);
 
 		when(mockDao.insert(shoes)).thenReturn(true);
 		testService.insert(shoes);
-		shoes.setShoesName("5566").setCategory("KKK").setPrice(5566).setBrandById(2);
 		
+		shoes.setShoesName("5566").setCategory("KKK").setPrice(5566).setBrandById(2);
 		when(mockDao.update(shoes)).thenReturn(true);
 		testService.update(shoes);
 		verify(mockDao).update(shoes);
@@ -80,7 +91,7 @@ public class ShoesTableServiceTest {
 
 	@Test
 	public void testDeleteById() {
-		GenericDao mockDao = testService.getGenericDao();
+
 		Shoes shoes = new Shoes();
 		shoes.setShoesId(5);
 		when(mockDao.insert(shoes)).thenReturn(true);
@@ -93,7 +104,8 @@ public class ShoesTableServiceTest {
 
 	@Test
 	public void testBuildFkEntity() {
-		ShoesTableService shoesService = (ShoesTableService) testService;
+		ShoesTableService shoesService = (ShoesTableService)testService;// for set context
+
 		ApplicationContext mockCtx = mock(ApplicationContext.class);
 		GenericDao mockBrandDao = mock(GenericDao.class);
 		shoesService.setApplicationContext(mockCtx);
@@ -102,13 +114,12 @@ public class ShoesTableServiceTest {
 		Brand brand = new Brand(15);
 		when(mockBrandDao.getById(15)).thenReturn(brand);
 		when(mockBrandDao.getById(3)).thenReturn(null);
-
-		assertEquals(brand, testService.buildFkEntity(15));
-		assertEquals(null, testService.buildFkEntity(3));
+		assertEquals(brand, shoesService.buildFkEntity(15));
+		assertEquals(null, shoesService.buildFkEntity(3));
 	}
 
 	@Test
-	public void testProcessUpdate() {
+	public void testAssociateFkEntity() {
 		ShoesTableService spyShoesService = spy(new ShoesTableService());
 		doReturn(new Brand(15)).when(spyShoesService).buildFkEntity(15);
 		doReturn(null).when(spyShoesService).buildFkEntity(3);
